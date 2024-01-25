@@ -1,0 +1,52 @@
+entryPoints:
+  web:
+    address: ":80"
+  websecure:
+    address: ":443"
+
+http:
+  routers:
+    http-catchall:
+      rule: "HostRegexp(`{host:.+}`)"
+      entrypoints:
+        - "web"
+      middlewares:
+        - "https-redirect"
+    dashboard-router:
+      rule: "Host(`dashboard.orbesle.fr`)"
+      entrypoints:
+        - "websecure"
+      service: "api@internal"
+      middlewares:
+        - "auth"
+      tls:
+        certResolver: "letsencrypt"
+
+  middlewares:
+    https-redirect:
+      redirectScheme:
+        scheme: "https"
+        permanent: true
+
+    auth:
+      basicAuth:
+        users:
+          - "orob:$apr1$8ZYR2qC9n4$$vsuhhDdnMQD6.j0IKxzID0"
+
+api:
+  dashboard: true
+
+certificatesResolvers:
+  letsencrypt:
+    acme:
+      email: "oscar@besle.org"
+      storage: "acme.json"
+      httpChallenge:
+        entryPoint: "web"
+
+log:
+  level: "DEBUG"
+
+providers:
+  docker:
+    exposedByDefault: false

@@ -1,0 +1,23 @@
+version: '3'
+
+services:
+  homarr:
+    container_name: homarr
+    image: ghcr.io/ajnart/homarr:latest
+    restart: unless-stopped
+    volumes:
+      - "/var/run/docker.sock:/var/run/docker.sock" # Optional, only if you want Docker integration
+      - "./homarr/configs:/app/data/configs"
+      - "./homarr/icons:/app/public/icons"
+      - "./homarr/data:/data"
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.homarr.rule=Host(`home.orbesle.fr`)"
+      - "traefik.http.routers.homarr.entrypoints=websecure"
+      - "traefik.http.routers.homarr.tls.certresolver=letsencrypt"
+    networks:
+      - web
+
+networks:
+  web:
+    external: true
